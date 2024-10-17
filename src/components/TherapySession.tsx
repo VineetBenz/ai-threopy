@@ -4,6 +4,41 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bot, Mic, User } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
+// Add type definitions for the Web Speech API
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: SpeechRecognitionErrorEvent) => void;
+  start: () => void;
+  stop: () => void;
+}
+
+interface SpeechRecognitionEvent {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionResultList {
+  [index: number]: SpeechRecognitionResult;
+  length: number;
+}
+
+interface SpeechRecognitionResult {
+  [index: number]: SpeechRecognitionAlternative;
+  isFinal: boolean;
+  length: number;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message: string;
+}
+
 const TherapySession = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -15,8 +50,8 @@ const TherapySession = () => {
     let recognition: SpeechRecognition | null = null;
 
     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition = new SpeechRecognitionConstructor();
+      const SpeechRecognitionConstructor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      recognition = new SpeechRecognitionConstructor() as SpeechRecognition;
       recognition.continuous = true;
       recognition.interimResults = true;
 
@@ -56,16 +91,16 @@ const TherapySession = () => {
   const startListening = () => {
     setTranscript('');
     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognitionConstructor();
+      const SpeechRecognitionConstructor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognition = new SpeechRecognitionConstructor() as SpeechRecognition;
       recognition.start();
     }
   };
 
   const stopListening = () => {
     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognitionConstructor();
+      const SpeechRecognitionConstructor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognition = new SpeechRecognitionConstructor() as SpeechRecognition;
       recognition.stop();
       getAIResponse();
     }
@@ -93,7 +128,7 @@ const TherapySession = () => {
       console.error('Error calling AI API:', error);
       toast({
         title: "Error",
-        description: "There was an error generating the AI response. Please try again.",
+        description: "There was an error connecting to the AI service. Please ensure the backend is running and try again.",
         variant: "destructive",
       });
       setAiResponse("I'm sorry, I couldn't generate a response at this time. Please try again.");

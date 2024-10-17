@@ -58,3 +58,12 @@ The backend will be available at `http://localhost:5000`.
 ## Usage
 
 With both the frontend and backend running, you can now use the AI Therapy Session application. The frontend will communicate with the backend to process user input and generate AI responses.
+
+## Troubleshooting
+
+If you encounter a "Failed to fetch" error, ensure that:
+1. The backend server is running at http://localhost:5000
+2. You have set up the Gemini API key correctly in the `.env` file
+3. There are no CORS issues (the backend should be configured to allow requests from the frontend)
+
+If issues persist, check the browser's developer console and the backend's console for more detailed error messages.
