@@ -4,9 +4,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bot, Mic, User } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
-// NOTE: In a production environment, never expose API keys in the client-side code
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HERE';
-
 const TherapySession = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -83,7 +80,7 @@ const TherapySession = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GEMINI_API_KEY}`
+          'Authorization': `Bearer ${import.meta.env.VITE_GEMINI_API_KEY}`
         },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }]
