@@ -4,6 +4,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bot, Mic, User } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
+// NOTE: In a production environment, never expose API keys in the client-side code
+const GEMINI_API_KEY = 'AIzaSyDziEiGEEHrNnwdbh9db9veEH-aBQfjj-g';
+
 const TherapySession = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -66,17 +69,32 @@ const TherapySession = () => {
       const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognitionConstructor();
       recognition.stop();
-      // Here you would typically send the transcript to the Gemini API
-      // and get a response. For now, we'll simulate it:
       simulateAIResponse();
     }
   };
 
-  const simulateAIResponse = () => {
-    // This is where you'd integrate with the Gemini API
-    // For now, we'll just set a mock response
-    setAiResponse("I understand you're feeling that way. Let's explore those thoughts further...");
-    speakAIResponse("I understand you're feeling that way. Let's explore those thoughts further...");
+  const simulateAIResponse = async () => {
+    // Placeholder for Gemini API call
+    const prompt = "Respond as a therapist to the following user input: " + transcript;
+    
+    try {
+      // This is a placeholder for the actual Gemini API call
+      // In a real implementation, you would make an API request here
+      console.log('Gemini API Key:', GEMINI_API_KEY);
+      console.log('Prompt:', prompt);
+      
+      // Simulated response
+      const response = "I understand you're feeling that way. Let's explore those thoughts further...";
+      setAiResponse(response);
+      speakAIResponse(response);
+    } catch (error) {
+      console.error('Error calling Gemini API:', error);
+      toast({
+        title: "Error",
+        description: "There was an error generating the AI response. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const speakAIResponse = (text: string) => {
