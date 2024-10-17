@@ -153,6 +153,7 @@ const TherapySession = () => {
       </div>
     </div>
   );
+
 };
 
 export default TherapySession;
