@@ -67,36 +67,30 @@ const TherapySession = () => {
       const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognitionConstructor();
       recognition.stop();
-      getGeminiResponse();
+      getAIResponse();
     }
   };
 
-  const getGeminiResponse = async () => {
+  const getAIResponse = async () => {
     setIsLoading(true);
-    const prompt = "Respond as a therapist to the following user input: " + transcript;
-    
     try {
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
+      const response = await fetch('http://localhost:5000/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_GEMINI_API_KEY}`
         },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
+        body: JSON.stringify({ message: transcript }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get response from Gemini API');
+        throw new Error('Failed to get response from AI');
       }
 
       const data = await response.json();
-      const generatedText = data.candidates[0].content.parts[0].text;
-      setAiResponse(generatedText);
-      speakAIResponse(generatedText);
+      setAiResponse(data.response);
+      speakAIResponse(data.response);
     } catch (error) {
-      console.error('Error calling Gemini API:', error);
+      console.error('Error calling AI API:', error);
       toast({
         title: "Error",
         description: "There was an error generating the AI response. Please try again.",
