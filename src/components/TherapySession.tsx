@@ -23,10 +23,10 @@ const TherapySession = () => {
       recognition.interimResults = true;
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = Array.from(event.results)
+        const currentTranscript = Array.from(event.results)
           .map(result => result[0].transcript)
           .join('');
-        setTranscript(transcript);
+        setTranscript(currentTranscript);
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -115,7 +115,7 @@ const TherapySession = () => {
       </div>
       
       <div className="mb-6 bg-gray-100 p-4 rounded-lg min-h-[100px]">
-        <p className="text-gray-800">{transcript || "Your speech will appear here..."}</p>
+        <p className="text-gray-800">{transcript || "Your speech will appear here in real-time..."}</p>
       </div>
       
       <div className="mb-6 bg-blue-100 p-4 rounded-lg min-h-[100px]">
