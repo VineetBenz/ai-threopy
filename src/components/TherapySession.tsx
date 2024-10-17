@@ -5,7 +5,7 @@ import { Bot, Mic, User } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 // NOTE: In a production environment, never expose API keys in the client-side code
-const GEMINI_API_KEY = 'AIzaSyDziEiGEEHrNnwdbh9db9veEH-aBQfjj-g';
+const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HERE';
 
 const TherapySession = () => {
   const [isListening, setIsListening] = useState(false);
