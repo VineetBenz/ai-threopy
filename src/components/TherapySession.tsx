@@ -114,11 +114,17 @@ const TherapySession = () => {
         </div>
       </div>
       
-      <div className="mb-6 bg-gray-100 p-4 rounded-lg min-h-[100px]">
-        <p className="text-gray-800">{transcript || "Your speech will appear here in real-time..."}</p>
+      <div className="mb-6 bg-gray-100 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold mb-2 text-gray-700">Speech-to-Text</h3>
+        <div className="min-h-[100px] bg-white p-3 rounded border border-gray-300">
+          <p className="text-gray-800">
+            {transcript || (isListening ? "Listening... Speak now." : "Click 'Start Listening' to begin.")}
+          </p>
+        </div>
       </div>
       
       <div className="mb-6 bg-blue-100 p-4 rounded-lg min-h-[100px]">
+        <h3 className="text-lg font-semibold mb-2 text-blue-700">AI Response</h3>
         <p className="text-gray-800">{aiResponse || "AI response will appear here..."}</p>
       </div>
       
