@@ -38,7 +38,7 @@ This project consists of a React frontend and a Python Flask backend for an AI-p
 
 4. Install the required Python packages:
    ```
-   pip install flask flask-cors google-generativeai
+   pip install flask flask-cors requests
    ```
 
 5. Set up your Gemini API key:
