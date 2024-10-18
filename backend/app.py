@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-API_KEY = os.environ.get("GEMINI_API_KEY")  # Get API key from environment variable
+API_KEY = 'AIzaSyDziEiGEEHrNnwdbh9db9veEH-aBQfjj-g'   # Get API key from environment variable
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
