@@ -1,188 +1,67 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bot, Mic, User } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import React, { useState } from 'react';
 
-// Add type definitions for the Web Speech API
-interface SpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  onresult: (event: SpeechRecognitionEvent) => void;
-  onerror: (event: SpeechRecognitionErrorEvent) => void;
-  start: () => void;
-  stop: () => void;
-}
-
-interface SpeechRecognitionEvent {
-  results: SpeechRecognitionResultList;
-}
-
-interface SpeechRecognitionResultList {
-  [index: number]: SpeechRecognitionResult;
-  length: number;
-}
-
-interface SpeechRecognitionResult {
-  [index: number]: SpeechRecognitionAlternative;
-  isFinal: boolean;
-  length: number;
-}
-
-interface SpeechRecognitionAlternative {
-  transcript: string;
-  confidence: number;
-}
-
-interface SpeechRecognitionErrorEvent extends Event {
-  error: string;
-  message: string;
-}
-
-const TherapySession = () => {
-  const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState('');
+function ChatComponent() {
+  const [inputText, setInputText] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
-  useEffect(() => {
-    let recognition: SpeechRecognition | null = null;
-
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognitionConstructor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      recognition = new SpeechRecognitionConstructor() as SpeechRecognition;
-      recognition.continuous = true;
-      recognition.interimResults = true;
-
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const currentTranscript = Array.from(event.results)
-          .map(result => result[0].transcript)
-          .join('');
-        setTranscript(currentTranscript);
-      };
-
-      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error('Speech recognition error', event.error);
-        toast({
-          title: "Error",
-          description: "There was an error with speech recognition. Please try again.",
-          variant: "destructive",
-        });
-      };
-    }
-
-    return () => {
-      if (recognition) {
-        recognition.stop();
-      }
-    };
-  }, []);
-
-  const toggleListening = () => {
-    setIsListening(!isListening);
-    if (!isListening) {
-      startListening();
-    } else {
-      stopListening();
-    }
-  };
-
-  const startListening = () => {
-    setTranscript('');
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognitionConstructor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      const recognition = new SpeechRecognitionConstructor() as SpeechRecognition;
-      recognition.start();
-    }
-  };
-
-  const stopListening = () => {
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognitionConstructor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      const recognition = new SpeechRecognitionConstructor() as SpeechRecognition;
-      recognition.stop();
-      getAIResponse();
-    }
-  };
-
-  const getAIResponse = async () => {
+  const handleSendMessage = async () => {
     setIsLoading(true);
+    setAiResponse(''); // Clear previous response
+
     try {
       const response = await fetch('http://localhost:5000/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: transcript }),
+        body: JSON.stringify({ message: inputText }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get response from AI');
+        throw new Error('Network response was not ok');
       }
 
       const data = await response.json();
-      setAiResponse(data.response);
-      speakAIResponse(data.response);
+      console.log('AI API response:', data);  // Debugging line to inspect the response
+
+      if (data.response) {
+        setAiResponse(data.response);  // Set the AI response
+      } else if (data.error) {
+        setAiResponse(`Error: ${data.error}`);
+      } else {
+        setAiResponse("No valid response from AI API.");
+      }
     } catch (error) {
       console.error('Error calling AI API:', error);
-      toast({
-        title: "Error",
-        description: "There was an error connecting to the AI service. Please ensure the backend is running and try again.",
-        variant: "destructive",
-      });
       setAiResponse("I'm sorry, I couldn't generate a response at this time. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const speakAIResponse = (text: string) => {
-    const speech = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(speech);
-  };
-
   return (
-    <div className="w-full max-w-2xl bg-white rounded-lg shadow-xl p-6">
-      <div className="flex items-center mb-6">
-        <Avatar className="h-12 w-12 mr-4">
-          <AvatarFallback><Bot /></AvatarFallback>
-        </Avatar>
-        <div>
-          <h2 className="text-2xl font-semibold text-gray-800">AI Therapist</h2>
-          <p className="text-sm text-gray-600">Here to listen and help</p>
-        </div>
-      </div>
-      
-      <div className="mb-6 bg-gray-100 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2 text-gray-700">Speech-to-Text</h3>
-        <div className="min-h-[100px] bg-white p-3 rounded border border-gray-300">
-          <p className="text-gray-800">
-            {transcript || (isListening ? "Listening... Speak now." : "Click 'Start Listening' to begin.")}
-          </p>
-        </div>
-      </div>
-      
-      <div className="mb-6 bg-blue-100 p-4 rounded-lg min-h-[100px]">
-        <h3 className="text-lg font-semibold mb-2 text-blue-700">AI Response</h3>
-        <p className="text-gray-800">
-          {isLoading ? "Generating response..." : (aiResponse || "AI response will appear here...")}
-        </p>
-      </div>
-      
-      <div className="flex justify-center">
-        <Button 
-          onClick={toggleListening} 
-          className={`flex items-center ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
-          disabled={isLoading}
-        >
-          <Mic className="mr-2" />
-          {isListening ? 'Stop Listening' : 'Start Listening'}
-        </Button>
-      </div>
+    <div>
+      <textarea
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
+        placeholder="Type your message here..."
+        rows={4}
+        className="p-2 border rounded w-full"
+      />
+      <button
+        onClick={handleSendMessage}
+        className="bg-blue-500 text-white px-4 py-2 rounded mt-2"
+        disabled={isLoading}
+      >
+        {isLoading ? "Sending..." : "Send"}
+      </button>
+      <p className="text-gray-800 mt-4">
+        {isLoading ? "Generating response..." : (aiResponse || "AI response will appear here...")}
+      </p> 
     </div>
   );
+}
 
-};
-
-export default TherapySession;
+export default ChatComponent;
+ 
