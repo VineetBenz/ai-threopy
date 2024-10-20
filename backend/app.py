@@ -13,24 +13,32 @@ def home():
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    print("Chat endpoint hit")  # Check if the endpoint is reached
+    print("Chat endpoint hit")  # Log that the endpoint is reached
     try:
         data = request.json
-        print(f"Request data: {data}")  # Print incoming request data
+        print(f"Request data: {data}")  # Log incoming request data
 
-        text = data.get('message', '')
-        if not text:
+        # Extract conversation history and new message from the request data
+        conversation_history = data.get('conversation_history', '')  # Retrieve history
+        new_message = data.get('message', '')  # Retrieve new message
+
+        if not new_message:
             print("No message provided")  # Log missing message
             return jsonify({'error': 'No message provided'}), 400
 
+        # Append the new user input to the existing conversation history
+        conversation_history_text = f"{conversation_history}\nUser: {new_message}\n"
+
+        # Payload for the Gemini API
         headers = {'Content-Type': 'application/json'}
         payload = {
             "contents": [
                 {
                     "parts": [
                         {
-                            "text": f"As an AI therapist, respond to the following user input: {text}\n\n"
-                                    "Provide a compassionate and supportive response."
+                            "text": f"Here is the ongoing conversation:\n\n"
+                                    f"{conversation_history_text}\n\n"
+                                    "As a therapist, please respond with compassion and guidance, considering what has been discussed."
                         }
                     ]
                 }
@@ -43,15 +51,23 @@ def chat():
             headers=headers,
             json=payload
         )
-        
-        print(f"Gemini API Response status code: {response.status_code}")  # Log status code
-        print(f"Gemini API Response content: {response.text}")  # Print the entire response content
+
+        print(f"Gemini API Response status code: {response.status_code}")  # Log the status code
+        print(f"Gemini API Response content: {response.text}")  # Log the response content
 
         if response.status_code == 200:
             result = response.json()
             if 'candidates' in result:
+                # Extract model response
                 model_output = result['candidates'][0]['content']['parts'][0]['text']
-                return jsonify({'response': model_output})
+
+                # Update conversation with the assistant's latest response
+                updated_conversation = f"{conversation_history_text}\nAssistant: {model_output}\n"
+                
+                # Print the full conversation history in the terminal
+                print(f"Full conversation history:\n{updated_conversation}")
+
+                return jsonify({'response': model_output, 'updated_conversation': updated_conversation})
             else:
                 print("Unexpected response structure")  # Log unexpected structure
                 return jsonify({'error': 'Unexpected response structure'}), 500
